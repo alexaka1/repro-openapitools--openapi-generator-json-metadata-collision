@@ -53,7 +53,15 @@ Unexpected exceptions are not caught.
 To test 7.25.0, run in a separate fresh copy of the source:
 
 ```sh
-bash generate.sh 7.25.0
+bash generate.sh openapitools/openapi-generator-cli:v7.25.0
+dotnet run --project Repro
+```
+
+The optional argument is a complete Docker image reference. To repeat the
+verified master run in a fresh copy, use its immutable image digest:
+
+```sh
+bash generate.sh openapitools/openapi-generator-cli@sha256:59e5b217992f920639a0b88375f1d0bfae2e81d7f6a5ae6afdee96b68bc802f0
 dotnet run --project Repro
 ```
 
@@ -64,11 +72,11 @@ when using native Linux Docker. The verified runs below used macOS Docker Deskto
 ## Verified environment
 
 Verified on 2026-10-06 from fresh directories without previous generated or build
-output. Both versions produced the same warning and runtime result.
+output. Both releases and the master snapshot produced the same warning and runtime result.
 
 | Component | Version |
 |---|---|
-| OpenAPI Generator | 7.25.0 (`ef964b0`) and 7.26.0 (`fba9e36`) |
+| OpenAPI Generator | 7.25.0 (`ef964b0`), 7.26.0 (`fba9e36`), and master 7.27.0-SNAPSHOT (`609b95d`) |
 | Latest release checked | 7.26.0, released 2026-10-06 |
 | .NET SDK / runtime | 10.0.401 / 10.0.12 |
 | Loaded System.Text.Json | Bundled 10.0.12, not a separately referenced NuGet package |
@@ -84,10 +92,17 @@ for full environment information.
 In a separate fresh generated copy, `dotnet build Repro -warnaserror:SYSLIB1031`
 failed with exit code `1` and the diagnostic promoted to an error.
 
-The current master commit `609b95d844d80d067026d414ac24472c25ba88f2` was inspected,
-not built. Its generator source and templates are unchanged from 7.26.0; the
-intervening commit prepares version 7.27.0. This is a source comparison, not a
-claim of executing a master build.
+The master run used upstream's published Docker image for commit
+`609b95d844d80d067026d414ac24472c25ba88f2`, the current master HEAD at verification.
+The image's `org.opencontainers.image.revision` label matches that SHA, and
+`version --full` reports `7.27.0-SNAPSHOT` at commit `609b95d`. The digest-pinned
+image was used to validate the schema and generate a fresh client, which was
+then built and executed by the same runner. Generation exited `0`; the runner
+exited `1` with `RESULT BUG REPRODUCED` and all controls passing.
+
+Upstream documents the `latest` image in its
+[master-testing instructions](https://github.com/OpenAPITools/openapi-generator/wiki/FAQ#how-to-test-with-the-latest-master-of-openapi-generator).
+The digest above preserves the exact tested build when that tag moves.
 
 ## Cause and separately verified correction
 
