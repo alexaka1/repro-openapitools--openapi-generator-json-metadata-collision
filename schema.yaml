@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: Nested enum metadata collision
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Asset:
+      type: object
+      properties:
+        image:
+          $ref: '#/components/schemas/ImageAsset'
+        document:
+          $ref: '#/components/schemas/DocumentAsset'
+    ImageAsset:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [image]
+    DocumentAsset:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [document]
